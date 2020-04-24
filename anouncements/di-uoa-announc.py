@@ -1,5 +1,12 @@
 from bs4 import BeautifulSoup
 import requests
+import csv
+
+# Create the csv output file
+csv_file = open("di.announc.csv", mode="w")
+fields = ["date", "title", "link"]
+csv_writer = csv.DictWriter(csv_file, fieldnames=fields)
+csv_writer.writeheader()
 
 # Base url
 host = "http://www.di.uoa.gr"
@@ -28,7 +35,7 @@ while True:
         link = host + item.find("div", class_="views-field-title").a["href"]
 
         output = {"date": date, "title": title, "link": link}
-        print(output)
+        csv_writer.writerow(output)
 
     pagination = news_panel.find("div", class_="item-list")
     try:
@@ -37,3 +44,6 @@ while True:
         break
     else:
         url = host + next_page
+
+csv_file.close()
+print("\n\n*** Finished scrapping di.uoa announcements ***\n\n")
