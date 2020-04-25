@@ -6,11 +6,12 @@ import re
 
 # Create the file
 csv_file = open("stuff.csv", mode="w")
-fields = ["designation", "name"]
+fields = ["designation", "name", "division", "courses"]
 csv_writer = csv.DictWriter(csv_file, fieldnames=fields)
 csv_writer.writeheader()
 
-url = "http://www.ece.upatras.gr/index.php/el/faculty.html"
+host = "http://www.ece.upatras.gr"
+url = host + "/index.php/el/faculty.html"
 
 html = requests.get(url).content
 soup = BeautifulSoup(html, "lxml")
@@ -42,8 +43,42 @@ for row in container.find_all("div", class_="sppb-col-md-4"):
         else:
             name = (person.find("span", class_="sppb-person-name")).a.text
 
-        output = {"designation": designation, "name": name}
+        # Get the link
+        person_link = host + person.find("span", class_="sppb-person-name").a["href"]
+
+        person_html = requests.get(person_link).content
+        person_soup = BeautifulSoup(person_html, "lxml")
+
+        # Get the division
+        division = person_soup.find("span", class_="sppb-person-email").a.text
+
+        # Get the teaching link
+        teaching_link = (
+            person_link
+            + person_soup.find("ul", class_="sppb-nav sppb-nav-pills").find_all("li")[1].a["href"]
+        )
+        try:
+            teaching_html = requests.get(teaching_link).content
+            teaching_soup = BeautifulSoup(teaching_html, "lxml")
+
+            # Get the courses table
+            courses_text = (
+                teaching_soup.find_all("div", class_="sppb-addon sppb-addon-text-block 0")[1]
+                .find("div", class_="sppb-addon-content")
+                .text.strip()
+            )
+            courses = re.sub(r"(\n)+", "\n", courses_text).replace("\xa0", " ")
+        except AttributeError:
+            print(f"Could not parse for {name}")
+            courses = "N/A"
+
+        output = {
+            "designation": designation,
+            "name": name,
+            "division": division,
+            "courses": courses,
+        }
         csv_writer.writerow(output)
 
-
+csv_file.close()
 print("\n\n*** Finished Scraping ***\n\n")
