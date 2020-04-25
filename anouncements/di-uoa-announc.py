@@ -19,7 +19,7 @@ while True:
     html = requests.get(url).content
 
     # Create the soup from the html page
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, "lxml")
 
     # Get the announcement panel
     news_panel = soup.find("div", class_="panel-pane pane-views pane-news")

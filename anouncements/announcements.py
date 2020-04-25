@@ -18,7 +18,7 @@ while True:
     host = url.split("/index")[0]
 
     # Create the soup of the html site
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, "lxml")
 
     # Get the table of announcements
     announcement_table = soup.find(

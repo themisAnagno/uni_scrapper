@@ -13,7 +13,7 @@ csv_writer.writeheader()
 url = "http://www.ece.upatras.gr/index.php/el/faculty.html"
 
 html = requests.get(url).content
-soup = BeautifulSoup(html)
+soup = BeautifulSoup(html, "lxml")
 
 container = soup.find_all("div", class_="sppb-row-container")[1]
 for row in container.find_all("div", class_="sppb-col-md-4"):
